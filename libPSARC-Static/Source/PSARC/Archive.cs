@@ -117,7 +117,15 @@ namespace libPSARC.PSARC {
                     uint blockSize = blockSizes[index];
                     streamIn.Read( buffer, 0, (int) blockSize );
                     var zOut = new zlib.ZOutputStream( streamOut );
-                    zOut.Write( buffer, 0, (int) blockSize );
+                    try
+                    {
+                        zOut.Write(buffer, 0, (int)blockSize);
+                    } catch (Exception e)
+                    {
+                        //Normally we should not accept this file as corrupt but it seems like this may happen
+                        //on overloaded archives
+                        break;
+                    }
                     zOut.Flush();
                     total += zOut.TotalOut;
                     index++;
