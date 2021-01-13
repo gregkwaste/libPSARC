@@ -117,17 +117,25 @@ namespace libPSARC.PSARC {
                     uint blockSize = blockSizes[index];
                     streamIn.Read( buffer, 0, (int) blockSize );
                     var zOut = new zlib.ZOutputStream( streamOut );
+                    long currentPos = streamOut.Position;
                     try
                     {
                         zOut.Write(buffer, 0, (int)blockSize);
+                        zOut.Flush();
+                        total += zOut.TotalOut;
                     } catch (Exception e)
                     {
-                        //Normally we should not accept this file as corrupt but it seems like this may happen
-                        //on overloaded archives
-                        break;
+                        /*If the block cannot be extracted, its probably alredy decompressed
+                         *This is happening lately with some last file blocks
+                         *Chances are that garbage data is added at the end of the file
+                         *but this doesn't seem to affect its parsing
+                        */
+
+                        //Make sure that no data has been written to the output stream
+                        streamOut.Seek( currentPos, SeekOrigin.Begin ); 
+                        streamOut.Write( buffer, 0, (int) blockSize );
+                        total += blockSize;
                     }
-                    zOut.Flush();
-                    total += zOut.TotalOut;
                     index++;
                 }
             }
