@@ -4,9 +4,9 @@
       "src": [
         {
           "files": [
-            "libPSARC-DLL/libPSARC-DLL.csproj"
+            "*.csproj"
           ],
-          "cwd": "..",
+          "cwd": ".",
           "exclude": [
             "**/obj/**",
             "**/bin/**",
@@ -14,8 +14,7 @@
           ]
         }
       ],
-      "dest": "obj/api",
-      "filter": "filterConfig.yml"
+      "dest": "obj/api"
     }
   ],
   "build": {
@@ -61,7 +60,7 @@
         ]
       }
     ],
-    "dest": "gh-pages",
+    "dest": "_site",
     "template": [
       "default"
     ]

@@ -108,37 +108,29 @@ namespace libPSARC.PSARC {
             streamOut = streamOut ?? new MemoryStream( (int) (ulong) fileEntry.fileSize );
             long startPosition = streamOut.Position;
 
-            //Check if block is already decompressed
-            if (blockSizes[index] == (uint) fileEntry.fileSize ) {
-                streamOut.Write( buffer, 0, (int) blockSizes[index] );
-            } else {
-                // loop until all blocks have been read
-                while ( total < size ) {
-                    uint blockSize = blockSizes[index];
-                    streamIn.Read( buffer, 0, (int) blockSize );
-                    var zOut = new zlib.ZOutputStream( streamOut );
-                    long currentPos = streamOut.Position;
-                    try
-                    {
-                        zOut.Write(buffer, 0, (int)blockSize);
-                        zOut.Flush();
-                        total += zOut.TotalOut;
-                    } catch (Exception e)
-                    {
-                        /*If the block cannot be extracted, its probably alredy decompressed
-                         *This is happening lately with some last file blocks
-                         *Chances are that garbage data is added at the end of the file
-                         *but this doesn't seem to affect its parsing
-                        */
+            // loop until all blocks have been read
+            while ( total < size ) {
+                uint blockSize = blockSizes[index];
+                streamIn.Read( buffer, 0, (int) blockSize );
 
-                        //Make sure that no data has been written to the output stream
-                        streamOut.Seek( currentPos, SeekOrigin.Begin ); 
-                        streamOut.Write( buffer, 0, (int) blockSize );
-                        total += blockSize;
-                    }
-                    index++;
+                var zOut = new ComponentAce.Compression.Libs.zlib.ZOutputStream( streamOut );
+                long currentPos = streamOut.Position;
+
+                //Detect zlib blocks
+                if (buffer[0] == 0x78) {
+                    zOut.Write( buffer, 0, (int) blockSize );
+                    zOut.Flush();
+                    total += zOut.TotalOut;
+                } else {
+                    //Make sure that no data has been written to the output stream
+                    streamOut.Seek( currentPos, SeekOrigin.Begin );
+                    streamOut.Write( buffer, 0, (int) blockSize );
+                    total += blockSize;
                 }
+
+                index++;
             }
+            
 
             streamOut.Flush();
             streamOut.Position = startPosition;

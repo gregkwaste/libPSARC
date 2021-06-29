@@ -153,7 +153,7 @@ namespace cliPSARC {
             FileMode fileMode = overwrite ? FileMode.Create : FileMode.CreateNew;
             using ( var fOut = new FileStream( filePath, fileMode, FileAccess.Write ) ) {
                 LogInfo( $"extracting {file}" );
-                archive.ExtractFile( streamIn, file, fOut );
+                archive.ExtractFile( file, fOut );
                 if ( exists ) LogOverwriteFile( filePath );
             }
         }
@@ -176,7 +176,7 @@ namespace cliPSARC {
 
         internal static int Main( string[] args ) {
 #if DEBUG_LOG
-            Debug.Listeners.Add( new TextWriterTraceListener( Console.Out ) );
+            Trace.Listeners.Add( new TextWriterTraceListener( Console.Out ) );
 #endif
 
             if ( args.Length == 0 ) return ShowHelp();

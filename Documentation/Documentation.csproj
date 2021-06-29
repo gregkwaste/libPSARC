@@ -102,7 +102,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
-    <Content Include="api\.gitignore" />
     <Content Include="templates\default\common.js" />
     <Content Include="templates\default\conceptual.extension.js" />
     <Content Include="templates\default\conceptual.html.primary.js" />
@@ -131,14 +130,14 @@
     <Content Include="templates\default\UniversalReference.html.primary.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\docfx.console.2.38.1\build\docfx.console.targets" Condition="Exists('..\packages\docfx.console.2.38.1\build\docfx.console.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>del /q /a-h "$(ProjectDir)\gh-pages\*"</PreBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\packages\docfx.console.2.58.0\build\docfx.console.targets" Condition="Exists('..\packages\docfx.console.2.58.0\build\docfx.console.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\docfx.console.2.38.1\build\docfx.console.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\docfx.console.2.38.1\build\docfx.console.targets'))" />
+    <Error Condition="!Exists('..\packages\docfx.console.2.58.0\build\docfx.console.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\docfx.console.2.58.0\build\docfx.console.targets'))" />
   </Target>
-  <PropertyGroup>
-    <PreBuildEvent>del /q /a-h "$(ProjectDir)\gh-pages\*"</PreBuildEvent>
-  </PropertyGroup>
 </Project>
