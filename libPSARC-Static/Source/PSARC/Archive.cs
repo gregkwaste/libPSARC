@@ -93,7 +93,7 @@ namespace libPSARC.PSARC {
         }
 
         public Stream ExtractFile( int fileIndex, Stream streamOut = null ) {
-            return ExtractFile( fileEntries[fileIndex], streamOut );
+             return ExtractFile( fileEntries[fileIndex], streamOut );
         }
 
         public Stream ExtractFile( FileEntry fileEntry, Stream streamOut = null) {
@@ -111,19 +111,30 @@ namespace libPSARC.PSARC {
             // loop until all blocks have been read
             while ( total < size ) {
                 uint blockSize = blockSizes[index];
+
+                if (blockSize == 0 ) {
+                    //Uncompressed block with size equal to the maxblocksize
+                    blockSize = header.maxBlockSize;
+                }
+
                 streamIn.Read( buffer, 0, (int) blockSize );
 
                 var zOut = new ComponentAce.Compression.Libs.zlib.ZOutputStream( streamOut );
-                long currentPos = streamOut.Position;
-
+                
                 //Detect zlib blocks
-                if (buffer[0] == 0x78) {
-                    zOut.Write( buffer, 0, (int) blockSize );
-                    zOut.Flush();
-                    total += zOut.TotalOut;
+                if (buffer[0] == 0x78 &&
+                    (buffer[1] == 0x01 || buffer[1] == 0x9C || buffer[1] == 0xDA)) {
+                    try {
+                        zOut.Write( buffer, 0, (int) blockSize );
+                        zOut.Flush();
+                        total += zOut.TotalOut;
+                    } catch {
+                        //If decompression fails it was probably an uncompressed part as well
+                        streamOut.Write( buffer, 0, (int) blockSize );
+                        total += blockSize;
+                    }
                 } else {
-                    //Make sure that no data has been written to the output stream
-                    streamOut.Seek( currentPos, SeekOrigin.Begin );
+                    //Partial uncompressed block
                     streamOut.Write( buffer, 0, (int) blockSize );
                     total += blockSize;
                 }
