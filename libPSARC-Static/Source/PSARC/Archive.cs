@@ -112,7 +112,7 @@ namespace libPSARC.PSARC {
             while ( total < size ) {
                 uint blockSize = blockSizes[index];
 
-                if (blockSize == 0 ) {
+                if (blockSize == 0) {
                     //Uncompressed block with size equal to the maxblocksize
                     blockSize = header.maxBlockSize;
                 }
@@ -122,8 +122,8 @@ namespace libPSARC.PSARC {
                 var zOut = new ComponentAce.Compression.Libs.zlib.ZOutputStream( streamOut );
                 
                 //Detect zlib blocks
-                if (buffer[0] == 0x78 &&
-                    (buffer[1] == 0x01 || buffer[1] == 0x9C || buffer[1] == 0xDA)) {
+                if (blockSize != size && buffer[0] == 0x78 &&
+                    (buffer[1] == 0x01 || buffer[1] == 0x9C || buffer[1] == 0xDA || buffer[1] == 0x5E) ) {
                     try {
                         zOut.Write( buffer, 0, (int) blockSize );
                         zOut.Flush();
